@@ -1,0 +1,17 @@
+{
+  "name": "breeze-sports",
+  "version": "1.0.0",
+  "description": "Breeze 2019 Sports site backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shashvat Kedia",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4"
+  }
+}
