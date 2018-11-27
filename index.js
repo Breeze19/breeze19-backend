@@ -14,7 +14,7 @@ app.use(bodyParser.json())
 app.use(cors())
 
 app.post('/register',function(req,res){
-  const data = req.body;
+  const data = req.body.data;
   firebase.database().ref('/data/registrations').push(data)
   res.json({
     result: "OK"
@@ -22,7 +22,7 @@ app.post('/register',function(req,res){
 })
 
 app.post('/email',function(req,res){
-  const data = req.body;
+  const data = req.body.data;
   firebase.database().ref('/data/email').push(data)
   res.json({
     result: "OK"
