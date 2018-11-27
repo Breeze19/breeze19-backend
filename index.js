@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(cors())
 
-app.get('/register',function(req,res){
+app.post('/register',function(req,res){
   const data = req.body;
   firebase.database().ref('/data/registrations').push(data)
   res.json({
@@ -21,7 +21,7 @@ app.get('/register',function(req,res){
   })
 })
 
-app.get('/email',function(req,res){
+app.post('/email',function(req,res){
   const data = req.body;
   firebase.database().ref('/data/email').push(data)
   res.json({
