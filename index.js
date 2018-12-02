@@ -27,6 +27,34 @@ app.post('/register',function(req,res){
   })
 })
 
+app.post('/register/tkk',function(req,res){
+  const data = req.body.data
+  firebase.database().ref('/data/registrationstkk').push(data).then(function(){
+    res.json({
+      result: "OK"
+    })
+  }).catch(function(err){
+    console.log(err)
+    res.json({
+      result: "Error"
+    })
+  })
+})
+
+app.post('/register/tkp',function(req,res){
+  const data = req.body.data
+  firebase.database().ref('/data/registrationstkp').push(data).then(function(){
+    res.json({
+      result: "OK"
+    })
+  }).catch(function(err){
+    console.log(err)
+    res.json({
+      result: "Error"
+    })
+  })
+})
+
 app.post('/email',function(req,res){
   const data = req.body.data;
   firebase.database().ref('/data/email').push(data).then(function(){
