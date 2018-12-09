@@ -107,7 +107,8 @@ app.get('/getcsv/:key',function(req,res){
             var stat = fs.statSync('./registrations.csv')
             res.writeHead(200,{
               'Content-Type': 'text/csv',
-              'Content-Length': stat.size
+              'Content-Length': stat.size,
+              'Content-disposition': 'attachment; filename=registrations.csv'
             })
             var readStream = fs.createReadStream('./registrations.csv')
             readStream.pipe(res)
