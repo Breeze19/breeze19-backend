@@ -5,9 +5,25 @@ const firebase = require('firebase');
 const config = require('./config.js');
 const createCSVWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 const app = express();
 
 const PORT = process.env.PORT || 8080
+
+const smtpTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: config.GMAIL_EMAIL_ID,
+    pass: config.GMAIL_PASSWORD
+  }
+})
+
+const mailOptions = {
+  from: config.GMAIL_EMAIL_ID,
+  to: '',
+  subject: 'Registration successful',
+  message: ''
+}
 
 firebase.initializeApp(config.FIREBASE_CONFIG)
 
@@ -15,9 +31,28 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(cors())
 
+function sendMail(data,isMail){
+    if(config.GMAIL_EMAIL_ID.length > 0 && config.GMAIL_PASSWORD.length > 0){
+    mailOptions.to = data.email
+    if(isMail){
+    mailOptions.message = "Hey " + data.name + "\n\nThank you for registering with us.\nThis is what we got from you:\n\n\tName: " + data.name + "\n\t Email: " + data.email + "\n\tContact: " + data.phno + "\n\tCollege: " + data.collegeName + "\n\tRegistered for: " + data.sportsName + "\nWe'll get back to shortly."
+    } else{
+    mailOptions.message = "Hey " + data.name + "\n\nThank you for your interest in the future events\nWe have received your email " + data.email + "\nWe'll get back to you shortly."
+    }
+    smtpTransporter.sendMail(mailoptions,function(error,response){
+      if(error){
+        console.log(error)
+      } else{
+        console.log(response)
+      }
+    })
+  }
+}
+
 app.post('/register',function(req,res){
   const data = req.body.data;
   firebase.database().ref('/data/registrations').push(data).then(function(){
+    sendMail(data,1)
     res.json({
       result: "OK"
     })
@@ -32,6 +67,7 @@ app.post('/register',function(req,res){
 app.post('/register/tkk',function(req,res){
   const data = req.body.data
   firebase.database().ref('/data/registrationstkk').push(data).then(function(){
+    sendMail(data,1)
     res.json({
       result: "OK"
     })
@@ -46,6 +82,7 @@ app.post('/register/tkk',function(req,res){
 app.post('/register/tkp',function(req,res){
   const data = req.body.data
   firebase.database().ref('/data/registrationstkp').push(data).then(function(){
+    sendMail(data,1)
     res.json({
       result: "OK"
     })
@@ -60,6 +97,7 @@ app.post('/register/tkp',function(req,res){
 app.post('/email',function(req,res){
   const data = req.body.data;
   firebase.database().ref('/data/email').push(data).then(function(){
+    sendMail(data,0)
     res.json({
       result: "OK"
     })
