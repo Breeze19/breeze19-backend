@@ -94,7 +94,7 @@ app.post('/register',function(req,res){
   const data = req.body.data;
   data["reg_id"] = uuid
   firebase.database().ref('/data/registrations').push(data).then(function(){
-    sendMail(data)
+    sendMail(data).then(function(){})
     res.json({
       result: "OK"
     })
@@ -141,12 +141,8 @@ app.get('/getcsv/:key',function(req,res){
     const csvWriter = createCSVWriter({
       path: './registrations.csv',
       header: [
-        {id: 'cgg',title: 'CGPA grad'},
-        {id: 'cgx',title: 'CGPA 10th'},
-        {id: 'cgxii',title: 'CGPA 12th'},
         {id: 'collegeName',title: 'College'},
         {id: 'email',title: 'Email'},
-        {id: 'lod',title: 'Location of Domicile'},
         {id: 'name',title: 'Name'},
         {id: 'noofplayers',title: 'No of. Players'},
         {id: 'phno',title: 'Phone no.'},
