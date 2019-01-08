@@ -32,7 +32,7 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(cors())
 
-function sendMail(data,isMail){
+function sendMail(data){
     if(config.GMAIL_EMAIL_ID.length > 0 && config.GMAIL_PASSWORD.length > 0){
       const mail_data = {
         name: data.name,
@@ -53,6 +53,10 @@ function sendMail(data,isMail){
     })  
   }
 }
+
+app.get("/send_mail",function(req,res){
+  sendMail(data)
+})
 
 app.post('/register',function(req,res){
   const data = req.body.data;
