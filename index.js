@@ -18,13 +18,6 @@ const smtpTransporter = nodemailer.createTransport({
   }
 })
 
-const mailOptions = {
-  from: config.GMAIL_EMAIL_ID,
-  to: '',
-  subject: 'Registration successful',
-  message: ''
-}
-
 firebase.initializeApp(config.FIREBASE_CONFIG)
 
 app.use(bodyParser.urlencoded({extended: true}))
