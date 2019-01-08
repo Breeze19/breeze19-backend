@@ -90,10 +90,17 @@ function sendMail(data){
   }
 }
 
+function getUniqueId(){
+  var id = "EV19"
+  var timestamp = new Date().getTime()
+  id = id + (timestamp % 10000)
+  return id
+}
+
 app.post('/register',function(req,res){
   const data = req.body.data;
-  data["reg_id"] = uuid
-  firebase.database().ref('/data/registrations').push(data).then(function(){
+  data["reg_id"] = getUniqueId();
+  firebase.database().ref('/data/registrations-new').push(data).then(function(){
     sendMail(data).then(function(){})
     res.json({
       result: "OK"
@@ -108,7 +115,8 @@ app.post('/register',function(req,res){
 
 app.post('/register/tkk',function(req,res){
   const data = req.body.data
-  firebase.database().ref('/data/registrationstkk').push(data).then(function(){
+  data["reg_id"] = getUniqueId()
+  firebase.database().ref('/data/registrationstkk-new').push(data).then(function(){
     sendMail(data)
     res.json({
       result: "OK"
@@ -123,7 +131,8 @@ app.post('/register/tkk',function(req,res){
 
 app.post('/register/tkp',function(req,res){
   const data = req.body.data
-  firebase.database().ref('/data/registrationstkp').push(data).then(function(){
+  data["reg_id"] = getUniqueId()
+  firebase.database().ref('/data/registrationstkp-new').push(data).then(function(){
     sendMail(data)
     res.json({
       result: "OK"
@@ -141,6 +150,7 @@ app.get('/getcsv/:key',function(req,res){
     const csvWriter = createCSVWriter({
       path: './registrations.csv',
       header: [
+        {id: 'reg_id',title: 'Registration id'},
         {id: 'collegeName',title: 'College'},
         {id: 'email',title: 'Email'},
         {id: 'name',title: 'Name'},
@@ -150,7 +160,7 @@ app.get('/getcsv/:key',function(req,res){
         {id: 'stream',title: 'Stream'}
       ]
     })
-    firebase.database().ref('/data/registrations').once('value').then(function(snapshot){
+    firebase.database().ref('/data/registrations-new').once('value').then(function(snapshot){
       if(snapshot.val()){
         try{
           if(fs.existsSync('./registrations.csv')){
