@@ -4,12 +4,18 @@ const cors = require('cors');
 const firebase = require('firebase');
 const config = require('./config.js');
 const createCSVWriter = require('csv-writer').createObjectCsvWriter;
-const emailTemplate = require('email-templates').EmailTemplate;
 const fs = require('fs');
 const nodemailer = require('nodemailer');
+const handlebars = require('nodemailer-express-handlebars');
 const app = express();
 
 const PORT = process.env.PORT || 8080
+
+firebase.initializeApp(config.FIREBASE_CONFIG)
+
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
+app.use(cors())
 
 const smtpTransporter = nodemailer.createTransport({
   service: 'gmail',
@@ -19,18 +25,18 @@ const smtpTransporter = nodemailer.createTransport({
   }
 })
 
-const templateSender = smtpTransporter.templateSender(
-  new emailTemplate('sports_email.hbs'),{
-    from: config.GMAIL_EMAIL_ID,
-    subject: "Thank you for registering"    
-  }
-)
+const options = {
+  viewEngine: {
+         extname: '.hbs',
+         layoutsDir: './',
+         defaultLayout : '',
+         partialsDir : './'
+     },
+     viewPath: './',
+     extName: '.hbs'
+}
 
-firebase.initializeApp(config.FIREBASE_CONFIG)
-
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(bodyParser.json())
-app.use(cors())
+smtpTransporter.use('compile',handlebars(options))
 
 function sendMail(data){
     if(config.GMAIL_EMAIL_ID.length > 0 && config.GMAIL_PASSWORD.length > 0){
@@ -40,28 +46,55 @@ function sendMail(data){
         reg_id: data.reg_id,
         req_acc: data.req_acc
       }
-      templateSender({
-        to: data.email
-      },
-    mail_data,function(err,info){
-      if(err){
-        console.error(err)
-      }
-      else{
-        console.log("Email sent")
-      }
-    })  
+      smtpTransporter.sendMail({
+        from: config.GMAIL_EMAIL_ID,
+        to: data.email,
+        subject: 'Registration successful',
+        attachments: [
+          {
+            filename: '5df50314-0c82-4fa1-8939-e02c6ab008e8.png',
+            path: __dirname + '/images/5df50314-0c82-4fa1-8939-e02c6ab008e8.png',
+            cid: '1'
+          },
+          {
+            filename: 'b6438a6d-ce4d-498c-b5c9-fe801cfa09d9.jpg',
+            path: __dirname + '/images/b6438a6d-ce4d-498c-b5c9-fe801cfa09d9.jpg',
+            cid: '6'
+          },
+          {
+            filename: 'color-facebook-48.png',
+            path: __dirname + '/images/color-facebook-48.png',
+            cid: '3'
+          },
+          {
+            filename: 'color-instagram-48.png',
+            path: __dirname + '/images/color-instagram-48.png',
+            cid: '5'
+          },
+          {
+            filename: 'color-link-48.png',
+            path: __dirname + '/images/color-link-48.png',
+            cid: '4'
+          },
+          {
+            filename: 'color-twitter-48.png',
+            path: __dirname + '/images/color-twitter-48.png',
+            cid: '2'
+          }
+        ],
+        template: 'sports_email',
+        context: mail_data
+       }, function (error, response) {
+         smtpTransporter.close();
+       });
   }
 }
-
-app.get("/send_mail",function(req,res){
-  sendMail(data)
-})
 
 app.post('/register',function(req,res){
   const data = req.body.data;
   data["reg_id"] = uuid
   firebase.database().ref('/data/registrations').push(data).then(function(){
+    sendMail(data)
     res.json({
       result: "OK"
     })
@@ -76,7 +109,7 @@ app.post('/register',function(req,res){
 app.post('/register/tkk',function(req,res){
   const data = req.body.data
   firebase.database().ref('/data/registrationstkk').push(data).then(function(){
-    sendMail(data,1)
+    sendMail(data)
     res.json({
       result: "OK"
     })
@@ -91,22 +124,7 @@ app.post('/register/tkk',function(req,res){
 app.post('/register/tkp',function(req,res){
   const data = req.body.data
   firebase.database().ref('/data/registrationstkp').push(data).then(function(){
-    sendMail(data,1)
-    res.json({
-      result: "OK"
-    })
-  }).catch(function(err){
-    console.log(err)
-    res.json({
-      result: "Error"
-    })
-  })
-})
-
-app.post('/email',function(req,res){
-  const data = req.body.data;
-  firebase.database().ref('/data/email').push(data).then(function(){
-    sendMail(data,0)
+    sendMail(data)
     res.json({
       result: "OK"
     })
